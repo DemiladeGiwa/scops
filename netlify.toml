@@ -1,53 +1,28 @@
 # netlify.toml
 # -------------
-# The VPS pre-builds the whole site (index.html, archive.html, archive/*.html,
-# login.html) via build_site.py and pushes it in the repo's ./site folder.
-# Netlify should NOT run its own build — just publish that folder as-is.
+# The VPS/GitHub Actions job pre-builds the whole site (index.html,
+# archive.html, archive/*.html) via build_site.py and pushes it in the
+# repo's ./site folder. Netlify should NOT run its own build — just
+# publish that folder as-is.
 
 [build]
   publish = "site"
-  # No "command" key: Netlify won't try to run npm/build tooling.
-  # (Enabling Identity itself is not a netlify.toml setting — it's a toggle
-  # under Site settings -> Identity in the dashboard. See DEPLOY.md.)
+
+# ---------------------------------------------------------------------------
+# ACCESS CONTROL - enforced server-side at Netlify's edge via Basic Auth.
+# This is the ACTIVE gate for the whole site. No Identity, no invite links,
+# no client-side JS gate — the edge function checks credentials before any
+# file is served.
+#
+# Requires: SITE_USER and SITE_PASS set in
+# Site configuration -> Environment variables in the Netlify dashboard.
+# ---------------------------------------------------------------------------
+
+[[edge_functions]]
+  path = "/*"
+  function = "basic-auth"
 
 [[headers]]
   for = "/*"
   [headers.values]
     X-Robots-Tag = "noindex, nofollow"
-
-# ---------------------------------------------------------------------------
-# ACCESS CONTROL - enforced at Netlify's edge, not just in the browser.
-# This is the ACTIVE default gate for the whole site.
-#
-# Requires: the invited user has a "viewer" role assigned in Identity
-# (Identity tab -> click the user -> add role "viewer"). See DEPLOY.md step 7.
-# Anyone without that role, including anonymous visitors, gets bounced to
-# /login.html before any report content is served.
-# ---------------------------------------------------------------------------
-
-# 1. Let login.html itself load with no gate check (otherwise it would
-#    redirect to itself in a loop).
-[[redirects]]
-  from = "/login.html"
-  to = "/login.html"
-  status = 200
-
-# 2. If the visitor's Identity JWT carries role "viewer", let the request
-#    through to whatever they asked for.
-[[redirects]]
-  from = "/*"
-  to = "/:splat"
-  status = 200
-  force = true
-  conditions = {Role = ["viewer"]}
-
-# 3. Anyone who reaches this point (no valid "viewer" role) gets sent to the
-#    login page with a 401, before any report content is returned.
-#    force = true is REQUIRED here: without it, Netlify serves the real
-#    static file (e.g. index.html) instead of applying the redirect, since
-#    an existing file on disk otherwise takes priority over a redirect rule.
-[[redirects]]
-  from = "/*"
-  to = "/login.html"
-  status = 401
-  force = true
