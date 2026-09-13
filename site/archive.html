@@ -6,170 +6,69 @@
 <meta name="robots" content="noindex, nofollow">
 <title>Security Report Archive</title>
 <style>
-  :root {
-    --crit: #b91c1c;
-    --high: #c2410c;
-    --med:  #a16207;
-    --bg:   #ffffff;
-    --text: #1f2937;
-    --muted:#6b7280;
-    --border:#e5e7eb;
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    line-height: 1.6;
-    color: var(--text);
-    background: #f9fafb;
-  }
-  .wrap {
-    max-width: 860px;
-    margin: 0 auto;
-    padding: 24px 18px 80px;
-  }
-  h1 { font-size: 1.6rem; margin-top: 0; }
-  h2 { font-size: 1.25rem; margin-top: 2.2rem; padding-bottom: 6px; border-bottom: 2px solid var(--border); }
-  h3 { font-size: 1.05rem; margin-top: 1.6rem; }
-  code {
-    background: #f1f5f9;
-    padding: 2px 5px;
-    border-radius: 4px;
-    font-size: 0.9em;
-    word-break: break-word;
-  }
-  pre {
-    background: #0f172a;
-    color: #e2e8f0;
-    padding: 14px;
-    border-radius: 8px;
-    overflow-x: auto;
-    font-size: 0.85rem;
-  }
-  pre code { background: none; color: inherit; padding: 0; }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 12px 0;
-    font-size: 0.92rem;
-  }
-  th, td {
-    border: 1px solid var(--border);
-    padding: 6px 10px;
-    text-align: left;
-  }
-  th { background: #f3f4f6; }
-  blockquote {
-    margin: 12px 0;
-    padding: 10px 14px;
-    border-left: 4px solid var(--muted);
-    background: #f3f4f6;
-    border-radius: 0 6px 6px 0;
-  }
-  section.critical { border-left: 5px solid var(--crit); padding-left: 14px; }
-  section.critical h2 { color: var(--crit); border-color: var(--crit); }
-  section.critical blockquote { border-left-color: var(--crit); background: #fef2f2; }
-  section.high { border-left: 5px solid var(--high); padding-left: 14px; }
-  section.high h2 { color: var(--high); border-color: var(--high); }
-  section.high blockquote { border-left-color: var(--high); background: #fff7ed; }
-  section.medium { border-left: 5px solid var(--med); padding-left: 14px; }
-  section.medium h2 { color: var(--med); border-color: var(--med); }
-  section.medium blockquote { border-left-color: var(--med); background: #fffbeb; }
-  section.other { padding-left: 14px; }
-  section.ai-summary {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-left: 5px solid #6366f1;
-    border-radius: 6px;
-    padding: 16px 18px;
-    margin: 20px 0 26px;
-  }
-  section.ai-summary h2 {
-    color: #3730a3;
-    border-color: #e0e7ff;
-    margin-top: 0;
-    padding-bottom: 8px;
-    font-size: 1.2rem;
-  }
-  section.ai-summary p {
-    color: #334155;
-    font-size: 0.96rem;
-    line-height: 1.65;
-    margin-top: 8px;
-    margin-bottom: 0;
-  }
-  section.ai-summary hr {
-    display: none;
-  }
-  .top-nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 18px;
-    font-size: 0.9rem;
-  }
-  .top-nav a { color: #2563eb; text-decoration: none; }
-  .top-nav a:hover { text-decoration: underline; }
-  .archive-list { list-style: none; padding: 0; }
-  .archive-list li {
-    padding: 10px 0;
-    border-bottom: 1px solid var(--border);
-  }
-  .archive-list a { color: #2563eb; text-decoration: none; font-weight: 500; }
-  .archive-list a:hover { text-decoration: underline; }
-
-  /* Netlify Identity gate: hides everything until login confirmed */
-  html.gated .wrap { display: none; }
-
-  @media (max-width: 600px) {
-    .wrap { padding: 16px 12px 60px; }
-    h1 { font-size: 1.35rem; }
-    h2 { font-size: 1.1rem; }
-    table, th, td { font-size: 0.85rem; }
-  }
+:root {
+  --crit: #b91c1c;
+  --high: #c2410c;
+  --med: #a16207;
+  --bg: #ffffff;
+  --text: #1f2937;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.6;
+  color: var(--text);
+  background: #f9fafb;
+}
+.wrap { max-width: 860px; margin: 0 auto; padding: 24px 18px 80px; }
+h1 { font-size: 1.6rem; margin-top: 0; }
+h2 { font-size: 1.25rem; margin-top: 2.2rem; padding-bottom: 6px; border-bottom: 2px solid var(--border); }
+h3 { font-size: 1.05rem; margin-top: 1.6rem; }
+code { background: #f1f5f9; padding: 2px 5px; border-radius: 4px; font-size: 0.9em; word-break: break-word; }
+pre { background: #0f172a; color: #e2e8f0; padding: 14px; border-radius: 8px; overflow-x: auto; font-size: 0.85rem; }
+pre code { background: none; color: inherit; padding: 0; }
+table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.92rem; }
+th, td { border: 1px solid var(--border); padding: 6px 10px; text-align: left; }
+th { background: #f3f4f6; }
+blockquote { margin: 12px 0; padding: 10px 14px; border-left: 4px solid var(--muted); background: #f3f4f6; border-radius: 0 6px 6px 0; }
+section.critical { border-left: 5px solid var(--crit); padding-left: 14px; }
+section.critical h2 { color: var(--crit); border-color: var(--crit); }
+section.critical blockquote { border-left-color: var(--crit); background: #fef2f2; }
+section.high { border-left: 5px solid var(--high); padding-left: 14px; }
+section.high h2 { color: var(--high); border-color: var(--high); }
+section.high blockquote { border-left-color: var(--high); background: #fff7ed; }
+section.medium { border-left: 5px solid var(--med); padding-left: 14px; }
+section.medium h2 { color: var(--med); border-color: var(--med); }
+section.medium blockquote { border-left-color: var(--med); background: #fffbeb; }
+section.other { padding-left: 14px; }
+section.ai-summary { background: #f8fafc; border: 1px solid #e2e8f0; border-left: 5px solid #6366f1; border-radius: 6px; padding: 16px 18px; margin: 20px 0 26px; }
+section.ai-summary h2 { color: #3730a3; border-color: #e0e7ff; margin-top: 0; padding-bottom: 8px; font-size: 1.2rem; }
+section.ai-summary p { color: #334155; font-size: 0.96rem; line-height: 1.65; margin-top: 8px; margin-bottom: 0; }
+.top-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; font-size: 0.9rem; }
+.top-nav a { color: #2563eb; text-decoration: none; }
+.top-nav a:hover { text-decoration: underline; }
+.archive-list { list-style: none; padding: 0; }
+.archive-list li { padding: 10px 0; border-bottom: 1px solid var(--border); }
+.archive-list a { color: #2563eb; text-decoration: none; font-weight: 500; }
+.archive-list a:hover { text-decoration: underline; }
+@media (max-width: 600px) {
+  .wrap { padding: 16px 12px 60px; }
+  h1 { font-size: 1.35rem; }
+  h2 { font-size: 1.1rem; }
+  table, th, td { font-size: 0.85rem; }
+}
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="top-nav">
-      <span>🔒 Private Security Report</span>
-      <a href="index.html">View latest report →</a>
-    </div>
-    <h1>📋 Report Archive</h1><ul class="archive-list"><li><a href="archive/security_audit_chopshaven.ca_2026-09-13_2207.html">chopshaven.ca — 2026-09-13 22:07</a></li></ul>
+<div class="wrap">
+  <div class="top-nav">
+    <span>Private Security Reports</span>
+    <a href="index.html">View latest report</a>
   </div>
-
-  <!-- Netlify Identity widget -->
-  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-  <script>
-    // Secondary UI gate (see note above) — edge-level enforcement happens
-    // via netlify.toml redirects before this page is ever served.
-    (function () {
-      document.documentElement.classList.add('gated');
-
-      function showApp(user) {
-        if (user) {
-          document.documentElement.classList.remove('gated');
-        } else {
-          document.documentElement.classList.add('gated');
-          netlifyIdentity.open('login');
-        }
-      }
-
-      netlifyIdentity.on('init', showApp);
-      netlifyIdentity.on('login', showApp);
-      netlifyIdentity.on('logout', function () {
-        document.documentElement.classList.add('gated');
-        netlifyIdentity.open('login');
-      });
-
-      netlifyIdentity.init();
-
-      // init() is async — also check once on load in case 'init' already fired
-      window.addEventListener('load', function () {
-        showApp(netlifyIdentity.currentUser());
-      });
-    })();
-  </script>
-
+  <h1>Report Archive</h1><ul class="archive-list"><li><a href="archive/security_audit_chopshaven.ca_2026-09-13_2207.html">chopshaven.ca  2026-09-13 22:07</a></li></ul>
+</div>
 </body>
 </html>
