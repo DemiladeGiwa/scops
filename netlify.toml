@@ -43,7 +43,11 @@
 
 # 3. Anyone who reaches this point (no valid "viewer" role) gets sent to the
 #    login page with a 401, before any report content is returned.
+#    force = true is REQUIRED here: without it, Netlify serves the real
+#    static file (e.g. index.html) instead of applying the redirect, since
+#    an existing file on disk otherwise takes priority over a redirect rule.
 [[redirects]]
   from = "/*"
   to = "/login.html"
   status = 401
+  force = true
