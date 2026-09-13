@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Security Report — chopshaven.ca — 2026-09-13 22:07</title>
+<style>
+  :root {
+    --crit: #b91c1c;
+    --high: #c2410c;
+    --med:  #a16207;
+    --bg:   #ffffff;
+    --text: #1f2937;
+    --muted:#6b7280;
+    --border:#e5e7eb;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    color: var(--text);
+    background: #f9fafb;
+  }
+  .wrap {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 24px 18px 80px;
+  }
+  h1 { font-size: 1.6rem; margin-top: 0; }
+  h2 { font-size: 1.25rem; margin-top: 2.2rem; padding-bottom: 6px; border-bottom: 2px solid var(--border); }
+  h3 { font-size: 1.05rem; margin-top: 1.6rem; }
+  code {
+    background: #f1f5f9;
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    word-break: break-word;
+  }
+  pre {
+    background: #0f172a;
+    color: #e2e8f0;
+    padding: 14px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 0.85rem;
+  }
+  pre code { background: none; color: inherit; padding: 0; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 0.92rem;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 6px 10px;
+    text-align: left;
+  }
+  th { background: #f3f4f6; }
+  blockquote {
+    margin: 12px 0;
+    padding: 10px 14px;
+    border-left: 4px solid var(--muted);
+    background: #f3f4f6;
+    border-radius: 0 6px 6px 0;
+  }
+  section.critical { border-left: 5px solid var(--crit); padding-left: 14px; }
+  section.critical h2 { color: var(--crit); border-color: var(--crit); }
+  section.critical blockquote { border-left-color: var(--crit); background: #fef2f2; }
+  section.high { border-left: 5px solid var(--high); padding-left: 14px; }
+  section.high h2 { color: var(--high); border-color: var(--high); }
+  section.high blockquote { border-left-color: var(--high); background: #fff7ed; }
+  section.medium { border-left: 5px solid var(--med); padding-left: 14px; }
+  section.medium h2 { color: var(--med); border-color: var(--med); }
+  section.medium blockquote { border-left-color: var(--med); background: #fffbeb; }
+  section.other { padding-left: 14px; }
+  .top-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+    font-size: 0.9rem;
+  }
+  .top-nav a { color: #2563eb; text-decoration: none; }
+  .top-nav a:hover { text-decoration: underline; }
+  .archive-list { list-style: none; padding: 0; }
+  .archive-list li {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .archive-list a { color: #2563eb; text-decoration: none; font-weight: 500; }
+  .archive-list a:hover { text-decoration: underline; }
+
+  /* Netlify Identity gate: hides everything until login confirmed */
+  html.gated .wrap { display: none; }
+
+  @media (max-width: 600px) {
+    .wrap { padding: 16px 12px 60px; }
+    h1 { font-size: 1.35rem; }
+    h2 { font-size: 1.1rem; }
+    table, th, td { font-size: 0.85rem; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top-nav">
+      <span>🔒 Private Security Report</span>
+      <a href="../index.html">← Back to latest</a>
+    </div>
+    <h1>🔒 Security Audit: chopshaven.ca</h1>
+<p><strong>Date:</strong> September 13, 2026 22:07<br />
+<strong>Target:</strong> https://chopshaven.ca<br />
+<strong>Platform:</strong> WordPress 6.8.6 — server: hcdn  </p>
+<hr />
+<section class="critical"><h2>🚨 Critical Vulnerabilities</h2>
+<h3>1. User Enumeration via REST API — Usernames Fully Exposed</h3>
+<blockquote>
+<p>[!CAUTION]
+The WordPress REST API publicly exposes registered usernames, giving an attacker half the credentials needed for a brute-force login attempt.</p>
+</blockquote>
+<p><strong>What's exposed:</strong> <code>https://chopshaven.ca/wp-json/wp/v2/users</code></p>
+<p>The WordPress REST API publicly exposes registered usernames, giving an attacker half the credentials needed for a brute-force login attempt.</p>
+<table>
+<thead>
+<tr>
+<th>User ID</th>
+<th>Display Name</th>
+<th>Username (slug)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2</td>
+<td>Himani Panwar</td>
+<td>himanipanwar</td>
+</tr>
+<tr>
+<td>1</td>
+<td>spidersdevadmin</td>
+<td>spidersdevadmin</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Stephen Isiuwe</td>
+<td>ekene_super_admin</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Fix:</strong></p>
+<pre><code class="language-php">// Add to functions.php — block REST user enumeration for logged-out visitors
+add_filter('rest_endpoints', function($endpoints) {
+    if (!is_user_logged_in()) {
+        unset($endpoints['/wp/v2/users']);
+        unset($endpoints['/wp/v2/users/(?P&lt;id&gt;[\d]+)']);
+    }
+    return $endpoints;
+});
+</code></pre>
+<hr />
+<h3>2. User Enumeration via Author Archives</h3>
+<blockquote>
+<p>[!CAUTION]
+Author archive pages leak usernames through the page <code>&lt;title&gt;</code> tag / canonical author URL, without needing the REST API.</p>
+</blockquote>
+<p><strong>What's exposed:</strong> <code>https://chopshaven.ca/?author=1</code></p>
+<p>Author archive pages leak usernames through the page <code>&lt;title&gt;</code> tag / canonical author URL, without needing the REST API.</p>
+<ul>
+<li><code>?author=4</code> → page title <code>Chopshaven</code> (https://chopshaven.ca/?author=4)</li>
+<li><code>?author=5</code> → page title <code>Chopshaven</code> (https://chopshaven.ca/?author=5)</li>
+</ul>
+<p><strong>Fix:</strong></p>
+<pre><code class="language-php">// Add to functions.php — redirect author archive queries
+add_action('template_redirect', function() {
+    if (is_author()) {
+        wp_redirect(home_url(), 301);
+        exit;
+    }
+});
+</code></pre>
+<hr /></section>
+<section class="high"><h2>⚠️ High-Severity Issues</h2>
+<h3>3. wp-login.php Publicly Accessible — No Rate Limiting Detected</h3>
+<blockquote>
+<p>[!WARNING]
+The default WordPress login page is reachable with no visible CAPTCHA, 2FA, or rate-limiting markers in the page source. This is a <strong>best-effort heuristic</strong> — some protections (server-side rate limiting, IP-based lockouts) don't show up in the HTML and may still be active. Treat this as 'worth confirming,' not conclusive.</p>
+</blockquote>
+<p><strong>What's exposed:</strong> <code>https://chopshaven.ca/wp-login.php</code></p>
+<p>The default WordPress login page is reachable with no visible CAPTCHA, 2FA, or rate-limiting markers in the page source. This is a <strong>best-effort heuristic</strong> — some protections (server-side rate limiting, IP-based lockouts) don't show up in the HTML and may still be active. Treat this as 'worth confirming,' not conclusive.</p>
+<p><strong>Fix:</strong></p>
+<pre><code>1. Install Wordfence or Limit Login Attempts Reloaded
+2. Add two-factor authentication (e.g. WP 2FA plugin)
+3. Consider a custom login URL (WPS Hide Login)
+4. Add CAPTCHA to the login form
+</code></pre>
+<hr />
+<h3>4. WordPress readme.html Exposed</h3>
+<blockquote>
+<p>[!WARNING]
+The default WordPress <code>readme.html</code> is publicly reachable, confirming the CMS and often the version.</p>
+</blockquote>
+<p><strong>What's exposed:</strong> <code>https://chopshaven.ca/readme.html</code></p>
+<p>The default WordPress <code>readme.html</code> is publicly reachable, confirming the CMS and often the version.</p>
+<p><strong>Fix:</strong></p>
+<pre><code class="language-apache"># In .htaccess
+&lt;Files readme.html&gt;
+  Order Deny,Allow
+  Deny from all
+&lt;/Files&gt;
+</code></pre>
+<hr />
+<h3>5. WordPress Version Number Exposed in HTML Source</h3>
+<blockquote>
+<p>[!WARNING]
+The exact WordPress/asset version is visible in the page source.</p>
+</blockquote>
+<p><strong>What's exposed:</strong> <code>https://chopshaven.ca</code></p>
+<p>The exact WordPress/asset version is visible in the page source.</p>
+<p><code>&lt;meta name="generator" content="WordPress 6.8.6"&gt;</code>
+Asset query strings: <code>?ver=06758</code>, <code>?ver=1.9</code>, <code>?ver=1789336136</code>, <code>?ver=2.19.3</code>, <code>?ver=4</code>, <code>?ver=5</code>, <code>?ver=6.0.6</code>, <code>?ver=6.8.6</code></p>
+<p><strong>Fix:</strong></p>
+<pre><code class="language-php">// Add to functions.php
+remove_action('wp_head', 'wp_generator');
+
+add_filter('style_loader_src', function($src) { return remove_query_arg('ver', $src); });
+add_filter('script_loader_src', function($src) { return remove_query_arg('ver', $src); });
+</code></pre>
+<hr /></section>
+<section class="medium"><h2>🔶 Medium-Severity Issues</h2>
+<h3>6. Missing Security Headers</h3>
+<blockquote>
+<p>[!IMPORTANT]
+Missing/leaking HTTP response headers:</p>
+</blockquote>
+<p><strong>What's exposed:</strong> <code>https://chopshaven.ca</code></p>
+<p>Missing/leaking HTTP response headers:</p>
+<table>
+<thead>
+<tr>
+<th>Header</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>X-Frame-Options</code></td>
+<td>✅ Present</td>
+</tr>
+<tr>
+<td><code>X-Content-Type-Options</code></td>
+<td>✅ Present</td>
+</tr>
+<tr>
+<td><code>Strict-Transport-Security</code></td>
+<td>✅ Present</td>
+</tr>
+<tr>
+<td><code>Referrer-Policy</code></td>
+<td>✅ Present</td>
+</tr>
+<tr>
+<td><code>Permissions-Policy</code></td>
+<td>✅ Present</td>
+</tr>
+<tr>
+<td><code>Content-Security-Policy</code></td>
+<td>✅ Present</td>
+</tr>
+</tbody>
+</table>
+<p>Also exposed: <code>X-Powered-By: PHP/8.3.33</code>, <code>Platform: hostinger</code></p>
+<p><strong>Fix:</strong></p>
+<pre><code class="language-apache">&lt;IfModule mod_headers.c&gt;
+  Header always set X-Frame-Options &quot;SAMEORIGIN&quot;
+  Header always set X-Content-Type-Options &quot;nosniff&quot;
+  Header always set Strict-Transport-Security &quot;max-age=31536000; includeSubDomains&quot;
+  Header always set Referrer-Policy &quot;strict-origin-when-cross-origin&quot;
+  Header always set Permissions-Policy &quot;camera=(), microphone=(), geolocation=()&quot;
+  Header always unset X-Powered-By
+&lt;/IfModule&gt;
+</code></pre>
+<hr />
+<h3>7. Plugin &amp; Theme Version Numbers Exposed</h3>
+<blockquote>
+<p>[!IMPORTANT]
+Plugin/theme names and versions visible in page source (usable to look up known CVEs):</p>
+</blockquote>
+<p><strong>What's exposed:</strong> <code>https://chopshaven.ca</code></p>
+<p>Plugin/theme names and versions visible in page source (usable to look up known CVEs):</p>
+<table>
+<thead>
+<tr>
+<th>Plugin/Theme</th>
+<th>Version</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>astra-sites</code></td>
+<td>06758</td>
+</tr>
+<tr>
+<td><code>chopshaven-wp-theme</code></td>
+<td>1.9</td>
+</tr>
+<tr>
+<td><code>contact-form-7</code></td>
+<td>6.0.6</td>
+</tr>
+<tr>
+<td><code>ultimate-addons-for-gutenberg</code></td>
+<td>2.19.3</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Fix:</strong></p>
+<pre><code>Strip `?ver=` query strings from enqueued assets, and keep all plugins/themes updated regardless.
+</code></pre>
+<hr />
+<h3>8. WP-JSON / REST API Fully Exposed</h3>
+<blockquote>
+<p>[!IMPORTANT]
+The full WordPress REST API root is publicly reachable, exposing site structure, content types, and routes.</p>
+</blockquote>
+<p><strong>What's exposed:</strong> <code>https://chopshaven.ca/wp-json/</code></p>
+<p>The full WordPress REST API root is publicly reachable, exposing site structure, content types, and routes.</p>
+<p><strong>Fix:</strong></p>
+<pre><code>Restrict with a plugin (e.g. Disable REST API) if the API isn't needed by the front end, or limit exposed routes via `rest_endpoints`.
+</code></pre>
+<hr /></section>
+<section class="other"><h2>📊 Attack Chain Summary</h2>
+<pre><code>Step 1: User Enumeration via REST API — Usernames Fully Exposed
+Step 2: User Enumeration via Author Archives
+Step 3: wp-login.php Publicly Accessible — No Rate Limiting Detected
+Step 4: WordPress readme.html Exposed
+Step 5: WordPress Version Number Exposed in HTML Source
+</code></pre>
+<blockquote>
+<p>[!CAUTION]
+The findings above can plausibly be chained together into a realistic path toward account or site compromise. Treat critical items as top priority.</p>
+</blockquote>
+<hr /></section>
+<section class="other"><h2>✅ Recommended Fixes — Priority Order</h2>
+<table>
+<thead>
+<tr>
+<th>Priority</th>
+<th>Fix</th>
+<th>Difficulty</th>
+<th>Time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🔴 <strong>P0</strong></td>
+<td>User Enumeration via REST API — Usernames Fully Exposed</td>
+<td>Easy–Medium</td>
+<td>5–20 min</td>
+</tr>
+<tr>
+<td>🔴 <strong>P0</strong></td>
+<td>User Enumeration via Author Archives</td>
+<td>Easy–Medium</td>
+<td>5–20 min</td>
+</tr>
+<tr>
+<td>🟠 <strong>P1</strong></td>
+<td>wp-login.php Publicly Accessible — No Rate Limiting Detected</td>
+<td>Easy–Medium</td>
+<td>5–20 min</td>
+</tr>
+<tr>
+<td>🟠 <strong>P1</strong></td>
+<td>WordPress readme.html Exposed</td>
+<td>Easy–Medium</td>
+<td>5–20 min</td>
+</tr>
+<tr>
+<td>🟠 <strong>P1</strong></td>
+<td>WordPress Version Number Exposed in HTML Source</td>
+<td>Easy–Medium</td>
+<td>5–20 min</td>
+</tr>
+<tr>
+<td>🟡 <strong>P2</strong></td>
+<td>Missing Security Headers</td>
+<td>Easy–Medium</td>
+<td>5–20 min</td>
+</tr>
+<tr>
+<td>🟡 <strong>P2</strong></td>
+<td>Plugin &amp; Theme Version Numbers Exposed</td>
+<td>Easy–Medium</td>
+<td>5–20 min</td>
+</tr>
+<tr>
+<td>🟡 <strong>P2</strong></td>
+<td>WP-JSON / REST API Fully Exposed</td>
+<td>Easy–Medium</td>
+<td>5–20 min</td>
+</tr>
+</tbody>
+</table>
+<hr /></section>
+<section class="other"><h2>✔️ Passed Checks</h2>
+<ul>
+<li>XML-RPC exposure — no issue found</li>
+</ul></section>
+  </div>
+
+  <!-- Netlify Identity widget -->
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <script>
+    // Secondary UI gate (see note above) — edge-level enforcement happens
+    // via netlify.toml redirects before this page is ever served.
+    (function () {
+      document.documentElement.classList.add('gated');
+
+      function showApp(user) {
+        if (user) {
+          document.documentElement.classList.remove('gated');
+        } else {
+          document.documentElement.classList.add('gated');
+          netlifyIdentity.open('login');
+        }
+      }
+
+      netlifyIdentity.on('init', showApp);
+      netlifyIdentity.on('login', showApp);
+      netlifyIdentity.on('logout', function () {
+        document.documentElement.classList.add('gated');
+        netlifyIdentity.open('login');
+      });
+
+      netlifyIdentity.init();
+
+      // init() is async — also check once on load in case 'init' already fired
+      window.addEventListener('load', function () {
+        showApp(netlifyIdentity.currentUser());
+      });
+    })();
+  </script>
+
+</body>
+</html>
