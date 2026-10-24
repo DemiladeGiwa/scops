@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<title>Security Report - chopshaven.ca  2026-10-23 08:07</title>
+<title>Security Report - chopshaven.ca  2026-10-24 07:46</title>
 <style>
 :root {
   --crit: #b91c1c;
@@ -69,32 +69,23 @@ section.ai-summary p { color: #334155; font-size: 0.96rem; line-height: 1.65; ma
     <a href="archive.html">View past reports</a>
   </div>
   <h1>🔒 Security Audit: chopshaven.ca</h1>
-<p><strong>Date:</strong> October 23, 2026 08:07<br />
+<p><strong>Date:</strong> October 24, 2026 07:46<br />
 <strong>Target:</strong> https://chopshaven.ca<br />
 <strong>Platform:</strong> WordPress (version not disclosed) — server: hcdn  </p>
 <hr />
-<section class="critical"><h3>1. User Enumeration via Author Archives</h3>
+<section class="high"><h3>1. WordPress readme.html Exposed</h3>
 <blockquote>
-<p>[!CAUTION]
-Author archive pages leak usernames through the page <code>&lt;title&gt;</code> tag / canonical author URL, without needing the REST API.</p>
+<p>[!WARNING]
+The default WordPress <code>readme.html</code> is publicly reachable, confirming the CMS and often the version.</p>
 </blockquote>
-<p><strong>What's exposed:</strong> <code>https://chopshaven.ca/?author=1</code></p>
-<p>Author archive pages leak usernames through the page <code>&lt;title&gt;</code> tag / canonical author URL, without needing the REST API.</p>
-<ul>
-<li><code>?author=1</code> → page title <code>Checking your browser before accessing. Just a moment...</code> (https://chopshaven.ca/?author=1)</li>
-<li><code>?author=2</code> → page title <code>Checking your browser before accessing. Just a moment...</code> (https://chopshaven.ca/?author=2)</li>
-<li><code>?author=3</code> → page title <code>Checking your browser before accessing. Just a moment...</code> (https://chopshaven.ca/?author=3)</li>
-<li><code>?author=4</code> → page title <code>Checking your browser before accessing. Just a moment...</code> (https://chopshaven.ca/?author=4)</li>
-<li><code>?author=5</code> → page title <code>Checking your browser before accessing. Just a moment...</code> (https://chopshaven.ca/?author=5)</li>
-</ul>
+<p><strong>What's exposed:</strong> <code>https://chopshaven.ca/readme.html</code></p>
+<p>The default WordPress <code>readme.html</code> is publicly reachable, confirming the CMS and often the version.</p>
 <p><strong>Fix:</strong></p>
-<pre><code class="language-php">// Add to functions.php — redirect author archive queries
-add_action('template_redirect', function() {
-    if (is_author()) {
-        wp_redirect(home_url(), 301);
-        exit;
-    }
-});
+<pre><code class="language-apache"># In .htaccess
+&lt;Files readme.html&gt;
+  Order Deny,Allow
+  Deny from all
+&lt;/Files&gt;
 </code></pre>
 <hr /></section>
 <section class="medium"><h3>2. Missing Security Headers</h3>
@@ -114,15 +105,15 @@ Missing/leaking HTTP response headers:</p>
 <tbody>
 <tr>
 <td><code>X-Frame-Options</code></td>
-<td>❌ Missing</td>
+<td>✅ Present</td>
 </tr>
 <tr>
 <td><code>X-Content-Type-Options</code></td>
-<td>❌ Missing</td>
+<td>✅ Present</td>
 </tr>
 <tr>
 <td><code>Strict-Transport-Security</code></td>
-<td>❌ Missing</td>
+<td>✅ Present</td>
 </tr>
 <tr>
 <td><code>Referrer-Policy</code></td>
@@ -138,6 +129,7 @@ Missing/leaking HTTP response headers:</p>
 </tr>
 </tbody>
 </table>
+<p>Also exposed: <code>X-Powered-By: PHP/8.3.35</code>, <code>Platform: hostinger</code></p>
 <p><strong>Fix:</strong></p>
 <pre><code class="language-apache">&lt;IfModule mod_headers.c&gt;
   Header always set X-Frame-Options &quot;SAMEORIGIN&quot;
@@ -148,8 +140,19 @@ Missing/leaking HTTP response headers:</p>
   Header always unset X-Powered-By
 &lt;/IfModule&gt;
 </code></pre>
+<hr />
+<h3>3. WP-JSON / REST API Fully Exposed</h3>
+<blockquote>
+<p>[!IMPORTANT]
+The full WordPress REST API root is publicly reachable, exposing site structure, content types, and routes.</p>
+</blockquote>
+<p><strong>What's exposed:</strong> <code>https://chopshaven.ca/wp-json/</code></p>
+<p>The full WordPress REST API root is publicly reachable, exposing site structure, content types, and routes.</p>
+<p><strong>Fix:</strong></p>
+<pre><code>Restrict with a plugin (e.g. Disable REST API) if the API isn't needed by the front end, or limit exposed routes via `rest_endpoints`.
+</code></pre>
 <hr /></section>
-<section class="other"><pre><code>Step 1: User Enumeration via Author Archives
+<section class="other"><pre><code>Step 1: WordPress readme.html Exposed
 </code></pre>
 <blockquote>
 <p>[!CAUTION]
@@ -167,8 +170,8 @@ The findings above can plausibly be chained together into a realistic path towar
 </thead>
 <tbody>
 <tr>
-<td>🔴 <strong>P0</strong></td>
-<td>User Enumeration via Author Archives</td>
+<td>🟠 <strong>P1</strong></td>
+<td>WordPress readme.html Exposed</td>
 <td>Easy–Medium</td>
 <td>5–20 min</td>
 </tr>
@@ -178,17 +181,22 @@ The findings above can plausibly be chained together into a realistic path towar
 <td>Easy–Medium</td>
 <td>5–20 min</td>
 </tr>
+<tr>
+<td>🟡 <strong>P2</strong></td>
+<td>WP-JSON / REST API Fully Exposed</td>
+<td>Easy–Medium</td>
+<td>5–20 min</td>
+</tr>
 </tbody>
 </table>
 <hr /></section>
 <section class="other"><ul>
 <li>XML-RPC exposure — no issue found</li>
 <li>User enumeration via REST API — no issue found</li>
+<li>User enumeration via author archives — no issue found</li>
 <li>Login hardening (wp-login.php) — no issue found</li>
-<li>readme.html exposure — no issue found</li>
 <li>Version disclosure — no issue found</li>
 <li>Plugin/theme version exposure — no issue found</li>
-<li>REST API root exposure — no issue found</li>
 </ul></section>
 </div>
 </body>
