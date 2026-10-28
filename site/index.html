@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<title>Security Report - chopshaven.ca  2026-10-27 08:31</title>
+<title>Security Report - chopshaven.ca  2026-10-28 09:09</title>
 <style>
 :root {
   --crit: #b91c1c;
@@ -69,11 +69,90 @@ section.ai-summary p { color: #334155; font-size: 0.96rem; line-height: 1.65; ma
     <a href="archive.html">View past reports</a>
   </div>
   <h1>🔒 Security Audit: chopshaven.ca</h1>
-<p><strong>Date:</strong> October 27, 2026 08:31<br />
+<p><strong>Date:</strong> October 28, 2026 09:09<br />
 <strong>Target:</strong> https://chopshaven.ca<br />
 <strong>Platform:</strong> WordPress (version not disclosed) — server: hcdn  </p>
 <hr />
-<section class="high"><h3>1. WordPress readme.html Exposed</h3>
+<section class="critical"><h3>1. User Enumeration via REST API — Usernames Fully Exposed</h3>
+<blockquote>
+<p>[!CAUTION]
+The WordPress REST API publicly exposes registered usernames, giving an attacker half the credentials needed for a brute-force login attempt.</p>
+</blockquote>
+<p><strong>What's exposed:</strong> <code>https://chopshaven.ca/wp-json/wp/v2/users</code></p>
+<p>The WordPress REST API publicly exposes registered usernames, giving an attacker half the credentials needed for a brute-force login attempt.</p>
+<table>
+<thead>
+<tr>
+<th>User ID</th>
+<th>Display Name</th>
+<th>Username (slug)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2</td>
+<td>Himani Panwar</td>
+<td>himanipanwar</td>
+</tr>
+<tr>
+<td>1</td>
+<td>spidersdevadmin</td>
+<td>spidersdevadmin</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Stephen Isiuwe</td>
+<td>ekene_super_admin</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Fix:</strong></p>
+<pre><code class="language-php">// Add to functions.php — block REST user enumeration for logged-out visitors
+add_filter('rest_endpoints', function($endpoints) {
+    if (!is_user_logged_in()) {
+        unset($endpoints['/wp/v2/users']);
+        unset($endpoints['/wp/v2/users/(?P&lt;id&gt;[\d]+)']);
+    }
+    return $endpoints;
+});
+</code></pre>
+<hr />
+<h3>2. User Enumeration via Author Archives</h3>
+<blockquote>
+<p>[!CAUTION]
+Author archive pages leak usernames through the page <code>&lt;title&gt;</code> tag / canonical author URL, without needing the REST API.</p>
+</blockquote>
+<p><strong>What's exposed:</strong> <code>https://chopshaven.ca/?author=1</code></p>
+<p>Author archive pages leak usernames through the page <code>&lt;title&gt;</code> tag / canonical author URL, without needing the REST API.</p>
+<ul>
+<li><code>?author=4</code> → page title <code>Chopshaven</code> (https://chopshaven.ca/?author=4)</li>
+<li><code>?author=5</code> → page title <code>Chopshaven</code> (https://chopshaven.ca/?author=5)</li>
+</ul>
+<p><strong>Fix:</strong></p>
+<pre><code class="language-php">// Add to functions.php — redirect author archive queries
+add_action('template_redirect', function() {
+    if (is_author()) {
+        wp_redirect(home_url(), 301);
+        exit;
+    }
+});
+</code></pre>
+<hr /></section>
+<section class="high"><h3>3. wp-login.php Publicly Accessible — No Rate Limiting Detected</h3>
+<blockquote>
+<p>[!WARNING]
+The default WordPress login page is reachable with no visible CAPTCHA, 2FA, or rate-limiting markers in the page source. This is a <strong>best-effort heuristic</strong> — some protections (server-side rate limiting, IP-based lockouts) don't show up in the HTML and may still be active. Treat this as 'worth confirming,' not conclusive.</p>
+</blockquote>
+<p><strong>What's exposed:</strong> <code>https://chopshaven.ca/wp-login.php</code></p>
+<p>The default WordPress login page is reachable with no visible CAPTCHA, 2FA, or rate-limiting markers in the page source. This is a <strong>best-effort heuristic</strong> — some protections (server-side rate limiting, IP-based lockouts) don't show up in the HTML and may still be active. Treat this as 'worth confirming,' not conclusive.</p>
+<p><strong>Fix:</strong></p>
+<pre><code>1. Install Wordfence or Limit Login Attempts Reloaded
+2. Add two-factor authentication (e.g. WP 2FA plugin)
+3. Consider a custom login URL (WPS Hide Login)
+4. Add CAPTCHA to the login form
+</code></pre>
+<hr />
+<h3>4. WordPress readme.html Exposed</h3>
 <blockquote>
 <p>[!WARNING]
 The default WordPress <code>readme.html</code> is publicly reachable, confirming the CMS and often the version.</p>
@@ -88,7 +167,7 @@ The default WordPress <code>readme.html</code> is publicly reachable, confirming
 &lt;/Files&gt;
 </code></pre>
 <hr /></section>
-<section class="medium"><h3>2. Missing Security Headers</h3>
+<section class="medium"><h3>5. Missing Security Headers</h3>
 <blockquote>
 <p>[!IMPORTANT]
 Missing/leaking HTTP response headers:</p>
@@ -141,7 +220,7 @@ Missing/leaking HTTP response headers:</p>
 &lt;/IfModule&gt;
 </code></pre>
 <hr />
-<h3>3. WP-JSON / REST API Fully Exposed</h3>
+<h3>6. WP-JSON / REST API Fully Exposed</h3>
 <blockquote>
 <p>[!IMPORTANT]
 The full WordPress REST API root is publicly reachable, exposing site structure, content types, and routes.</p>
@@ -152,7 +231,10 @@ The full WordPress REST API root is publicly reachable, exposing site structure,
 <pre><code>Restrict with a plugin (e.g. Disable REST API) if the API isn't needed by the front end, or limit exposed routes via `rest_endpoints`.
 </code></pre>
 <hr /></section>
-<section class="other"><pre><code>Step 1: WordPress readme.html Exposed
+<section class="other"><pre><code>Step 1: User Enumeration via REST API — Usernames Fully Exposed
+Step 2: User Enumeration via Author Archives
+Step 3: wp-login.php Publicly Accessible — No Rate Limiting Detected
+Step 4: WordPress readme.html Exposed
 </code></pre>
 <blockquote>
 <p>[!CAUTION]
@@ -169,6 +251,24 @@ The findings above can plausibly be chained together into a realistic path towar
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>🔴 <strong>P0</strong></td>
+<td>User Enumeration via REST API — Usernames Fully Exposed</td>
+<td>Easy–Medium</td>
+<td>5–20 min</td>
+</tr>
+<tr>
+<td>🔴 <strong>P0</strong></td>
+<td>User Enumeration via Author Archives</td>
+<td>Easy–Medium</td>
+<td>5–20 min</td>
+</tr>
+<tr>
+<td>🟠 <strong>P1</strong></td>
+<td>wp-login.php Publicly Accessible — No Rate Limiting Detected</td>
+<td>Easy–Medium</td>
+<td>5–20 min</td>
+</tr>
 <tr>
 <td>🟠 <strong>P1</strong></td>
 <td>WordPress readme.html Exposed</td>
@@ -192,9 +292,6 @@ The findings above can plausibly be chained together into a realistic path towar
 <hr /></section>
 <section class="other"><ul>
 <li>XML-RPC exposure — no issue found</li>
-<li>User enumeration via REST API — no issue found</li>
-<li>User enumeration via author archives — no issue found</li>
-<li>Login hardening (wp-login.php) — no issue found</li>
 <li>Version disclosure — no issue found</li>
 <li>Plugin/theme version exposure — no issue found</li>
 </ul></section>
