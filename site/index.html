@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<title>Security Report - chopshaven.ca  2026-11-03 10:19</title>
+<title>Security Report - chopshaven.ca  2026-11-04 10:12</title>
 <style>
 :root {
   --crit: #b91c1c;
@@ -69,9 +69,9 @@ section.ai-summary p { color: #334155; font-size: 0.96rem; line-height: 1.65; ma
     <a href="archive.html">View past reports</a>
   </div>
   <h1>🔒 Security Audit: chopshaven.ca</h1>
-<p><strong>Date:</strong> November 03, 2026 10:19<br />
+<p><strong>Date:</strong> November 04, 2026 10:12<br />
 <strong>Target:</strong> https://chopshaven.ca<br />
-<strong>Platform:</strong> WordPress (version not disclosed) — server: hcdn  </p>
+<strong>Platform:</strong> WordPress 6.8.12 — server: hcdn  </p>
 <hr />
 <section class="critical"><h3>1. User Enumeration via REST API — Usernames Fully Exposed</h3>
 <blockquote>
@@ -166,8 +166,25 @@ The default WordPress <code>readme.html</code> is publicly reachable, confirming
   Deny from all
 &lt;/Files&gt;
 </code></pre>
+<hr />
+<h3>5. WordPress Version Number Exposed in HTML Source</h3>
+<blockquote>
+<p>[!WARNING]
+The exact WordPress/asset version is visible in the page source.</p>
+</blockquote>
+<p><strong>What's exposed:</strong> <code>https://chopshaven.ca</code></p>
+<p>The exact WordPress/asset version is visible in the page source.</p>
+<p><code>&lt;meta name="generator" content="WordPress 6.8.12"&gt;</code>
+Asset query strings: <code>?ver=1.9</code>, <code>?ver=6.8.12</code></p>
+<p><strong>Fix:</strong></p>
+<pre><code class="language-php">// Add to functions.php
+remove_action('wp_head', 'wp_generator');
+
+add_filter('style_loader_src', function($src) { return remove_query_arg('ver', $src); });
+add_filter('script_loader_src', function($src) { return remove_query_arg('ver', $src); });
+</code></pre>
 <hr /></section>
-<section class="medium"><h3>5. Missing Security Headers</h3>
+<section class="medium"><h3>6. Missing Security Headers</h3>
 <blockquote>
 <p>[!IMPORTANT]
 Missing/leaking HTTP response headers:</p>
@@ -184,23 +201,23 @@ Missing/leaking HTTP response headers:</p>
 <tbody>
 <tr>
 <td><code>X-Frame-Options</code></td>
-<td>✅ Present</td>
+<td>❌ Missing</td>
 </tr>
 <tr>
 <td><code>X-Content-Type-Options</code></td>
-<td>✅ Present</td>
+<td>❌ Missing</td>
 </tr>
 <tr>
 <td><code>Strict-Transport-Security</code></td>
-<td>✅ Present</td>
+<td>❌ Missing</td>
 </tr>
 <tr>
 <td><code>Referrer-Policy</code></td>
-<td>✅ Present</td>
+<td>❌ Missing</td>
 </tr>
 <tr>
 <td><code>Permissions-Policy</code></td>
-<td>✅ Present</td>
+<td>❌ Missing</td>
 </tr>
 <tr>
 <td><code>Content-Security-Policy</code></td>
@@ -220,7 +237,32 @@ Missing/leaking HTTP response headers:</p>
 &lt;/IfModule&gt;
 </code></pre>
 <hr />
-<h3>6. WP-JSON / REST API Fully Exposed</h3>
+<h3>7. Plugin &amp; Theme Version Numbers Exposed</h3>
+<blockquote>
+<p>[!IMPORTANT]
+Plugin/theme names and versions visible in page source (usable to look up known CVEs):</p>
+</blockquote>
+<p><strong>What's exposed:</strong> <code>https://chopshaven.ca</code></p>
+<p>Plugin/theme names and versions visible in page source (usable to look up known CVEs):</p>
+<table>
+<thead>
+<tr>
+<th>Plugin/Theme</th>
+<th>Version</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>chopshaven-wp-theme</code></td>
+<td>1.9</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Fix:</strong></p>
+<pre><code>Strip `?ver=` query strings from enqueued assets, and keep all plugins/themes updated regardless.
+</code></pre>
+<hr />
+<h3>8. WP-JSON / REST API Fully Exposed</h3>
 <blockquote>
 <p>[!IMPORTANT]
 The full WordPress REST API root is publicly reachable, exposing site structure, content types, and routes.</p>
@@ -235,6 +277,7 @@ The full WordPress REST API root is publicly reachable, exposing site structure,
 Step 2: User Enumeration via Author Archives
 Step 3: wp-login.php Publicly Accessible — No Rate Limiting Detected
 Step 4: WordPress readme.html Exposed
+Step 5: WordPress Version Number Exposed in HTML Source
 </code></pre>
 <blockquote>
 <p>[!CAUTION]
@@ -276,8 +319,20 @@ The findings above can plausibly be chained together into a realistic path towar
 <td>5–20 min</td>
 </tr>
 <tr>
+<td>🟠 <strong>P1</strong></td>
+<td>WordPress Version Number Exposed in HTML Source</td>
+<td>Easy–Medium</td>
+<td>5–20 min</td>
+</tr>
+<tr>
 <td>🟡 <strong>P2</strong></td>
 <td>Missing Security Headers</td>
+<td>Easy–Medium</td>
+<td>5–20 min</td>
+</tr>
+<tr>
+<td>🟡 <strong>P2</strong></td>
+<td>Plugin &amp; Theme Version Numbers Exposed</td>
 <td>Easy–Medium</td>
 <td>5–20 min</td>
 </tr>
@@ -292,8 +347,6 @@ The findings above can plausibly be chained together into a realistic path towar
 <hr /></section>
 <section class="other"><ul>
 <li>XML-RPC exposure — no issue found</li>
-<li>Version disclosure — no issue found</li>
-<li>Plugin/theme version exposure — no issue found</li>
 </ul></section>
 </div>
 </body>
